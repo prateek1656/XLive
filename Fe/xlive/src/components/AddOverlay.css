@@ -1,0 +1,51 @@
+/* OverlayForm.css */
+.overlay-form {
+	max-width: 400px;
+	margin: 0 auto;
+	padding: 20px;
+  }
+  
+  .form-group {
+	margin-bottom: 10px;
+  }
+  
+  label {
+	display: block;
+	font-weight: bold;
+  }
+  
+  input {
+	width: 100%;
+	padding: 8px;
+	margin-bottom: 10px;
+  }
+  
+  .overlay-preview {
+	position: relative;
+	width: 300px;
+	height: 200px;
+	background-color: #eee;
+	margin: 20px auto;
+	border: 1px solid #ccc;
+  }
+  
+  .overlay {
+	position: absolute;
+	background-color: rgba(0, 0, 0, 0.5);
+	color: white;
+	padding: 5px;
+	cursor: pointer;
+  }
+  
+  button {
+	background-color: #007bff;
+	color: white;
+	border: none;
+	padding: 10px 20px;
+	cursor: pointer;
+  }
+  
+  button:hover {
+	background-color: #0056b3;
+  }
+  

@@ -5,7 +5,9 @@ __pycache__/
 
 # C extensions
 *.so
-
+*.ts
+*.m3u8
+.exe
 # Distribution / packaging
 .Python
 build/

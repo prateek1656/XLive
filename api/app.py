@@ -10,6 +10,8 @@ import os
 import cv2
 import os
 from bson import ObjectId
+import subprocess
+import ffmpeg
 
 # from models.overlay import overlay_settings
 cap = cv2.VideoCapture(os.environ.get("RSTP_URL"))
@@ -18,6 +20,11 @@ cap = cv2.VideoCapture(os.environ.get("RSTP_URL"))
 load_dotenv()
 app = Flask(__name__)
 api = Api(app)
+
+# app.config['FFMPEG_INPUTS'] = {
+#     'rtsp_stream': ['-i', os.environ.get("RSTP_URL") , '-c:v', 'libx264', '-f', 'hls', '-hls_time', '4', '-hls_list_size', '10', '-hls_flags', 'delete_segments', 'static/hls/stream.m3u8'],
+# }
+# ffmpeg = FFMpeg(app)
 
 uri = os.environ.get("MONGO_URI")
 client = MongoClient(uri, server_api=ServerApi('1'))
@@ -40,23 +47,56 @@ def check_connection():
 
 def generate_frames():
     while True:
+        # Read a frame from the video source
         success, frame = cap.read()
         if not success:
-            break
+             print("Error: Failed to read a frame from the video source.")
         else:
-            # Encode the frame to JPEG
-            ret, buffer = cv2.imencode('.jpg', frame)
-            if not ret:
+            # Convert the frame to JPEG
+            _, buffer = cv2.imencode('.jpg', frame)
+            if not _:
                 continue
+
+            # Yield the frame as MJPEG data
             yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+                b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
 
 @app.route('/feed', methods=['GET'])
 def video_feed():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-  
-  
+     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+# def hls():
+#     return Response(ffmpeg.stream('rtsp_stream'), mimetype='application/vnd.apple.mpegurl')
+
+@app.route('/hls')
+def hls():
+    rtsp_url = os.environ.get("RSTP_URL")
+    hls_output = 'static/hls/stream.m3u8'
+
+    try:
+        # Capture stderr output
+        ffmpeg_process = subprocess.Popen([
+            'ffmpeg', '-i', rtsp_url, '-c:v', 'libx264', '-f', 'hls', '-hls_time', '4', '-hls_list_size', '10',
+            '-hls_flags', 'delete_segments', hls_output
+        ], stderr=subprocess.PIPE, universal_newlines=True)
+
+        # Wait for FFmpeg to complete
+        stdout, stderr = ffmpeg_process.communicate()
+
+        if ffmpeg_process.returncode == 0:
+            with open(hls_output, 'rb') as f:
+                data = f.read()
+                return Response(data, mimetype='application/vnd.apple.mpegurl')
+        else:
+            return f"Error during video conversion. FFmpeg stderr: {stderr}"
+
+    except Exception as e:
+        return str(e)
+    
+    
+    
+    
+    
 @app.route('/overlays', methods=['GET'])
 def get_overlays():
     # Retrieve overlays from the database and render a template or return JSON response
