@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Video Streaming</title>
+</head>
+<body>
+    <h1>Live Video Stream</h1>
+    <img id="video" alt="Video Stream">
+    <script>
+        var img = document.getElementById('video');
+
+        // Make a GET request to the video stream
+        var source = new EventSource('/video_feed');
+
+        source.onmessage = function(event) {
+            // Update the image source with the received frame data
+            img.src = 'data:image/jpeg;base64,' + event.data;
+        };
+    </script>
+</body>
+</html>
