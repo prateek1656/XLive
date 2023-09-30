@@ -1,9 +1,11 @@
 /* OverlayForm.css */
-.overlay-form {
+/* CreateOverlays.css */
+.create-overlays {
 	max-width: 400px;
 	margin: 0 auto;
 	padding: 20px;
   }
+  
   
   .form-group {
 	margin-bottom: 10px;
